@@ -3,7 +3,7 @@ import smtplib
 import time
 import sqlite3 as sqlite
 from bs4 import BeautifulSoup
-print 'MegaBus Ticket Checker v1.0\n'
+print 'MegaBus Ticket Checker v1.1\n'
 
 mailSender = "email" #Gmail account being used to send email
 mailSenderPassword = "pass" #Gmail account's password
