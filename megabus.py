@@ -10,13 +10,7 @@ mailSenderPassword = "pass" #Gmail account's password
 cityCodes = { #Cities and their respective code
 	'Hamburg':191,
 	'Koeln':135,
-	'Austin':320, 
-	'austin':320, 
-	'Dallas':317, 
-	'dallas':317, 
-	'Houston':318, 
-	'houston':318
-} 
+}
 monthCodes = { #months and their respective number
 	1:'January',
 	2:'February',
@@ -107,7 +101,7 @@ def config_to_day_data(instance): #returns ([depart, arrive, cost], email, cost)
 		return None
 	if not userDetails[8] == True:
 		return "Inactive"
-	return megabus_day_data(userDetails[5], userDetails[6], userDetails[7], userDetails[3], userDetails[4]), userDetails[2], userDetails[9]
+	return megabus_day_data(userDetails[5], userDetails[6], userDetails[7], userDetails[3], userDetails[4]), userDetails[2], userDetails[9], userDetails[1]
 
 def save_cost_data(allData, instance):
 	configdb = sqlite.connect('config.db')
@@ -141,7 +135,7 @@ while True:
 			print "User {} request not for sale yet.\n".format(instance)
 			continue
 		if instanceData[2] == "0": #checks if user has previous cost data
-			send_email(instanceData[0], "Welcome to Megabus Checker. Please make sure to unblock {} if you wish to receive emails from this service. \n\n Now there are tickets available:".format(mailSender), instanceData[1])
+			send_email(instanceData[0], "Welcome to Megabus Checker. Please make sure to unblock {} if you wish to receive emails from this service. \n\n Now there are tickets available for you {}:".format(mailSender), instanceData[1], instanceData[3])
 			save_cost_data(instanceData[0], instance)
 		else:
 			if instanceData[2] == cost_template(instanceData[0]):
