@@ -51,15 +51,17 @@ def send_email(data, message, mailReceiver): #mailReceiver is email address of r
 	gmailserver.login(mailSender, mailSenderPassword)
 
 	#prepare message as a string
-	header = "Megabus Trip Details for {} {}, {} from {} to {}".format(monthCodes[parameters[0]], parameters[1], parameters[2], parameters[4], parameters[3])
+	header = "Subject: Megabus Trip Details for {} {}, {} from {} to {}".format(monthCodes[parameters[0]], parameters[1], parameters[2], parameters[3], parameters[4])
 	for each_trip in data:
 		message = message + "\n\n" + each_trip[0] + "\n" + each_trip[1] + "\n" + each_trip[2] 
 
+	message = message + "\n\n\n Best regards \n Nico"
 	#send message and quit server
 	gmailserver.sendmail(mailSender, mailReceiver, header + "\n\n\n" + message)
 	gmailserver.quit()
 
-	print "Email sent to {}\n".format(mailReceiver)
+	print "Email sent to {}:\n".format(mailReceiver)
+	print "{}".format(header + "\n\n\n" + message)
 
 def megabus_day_data(Month, Day, Year, destination, departure): #return trip details as list [departure, arrival, cost] for given parameters
 	global parameters 
@@ -141,7 +143,7 @@ while True:
 			print "User {} request not for sale yet.\n".format(instance)
 			continue
 		if instanceData[2] == "0": #checks if user has previous cost data
-			send_email(instanceData[0], "Welcome to Megabus Checker. Please make sure to unblock aj.test.python@gmail.com if you wish to receive emails from this service.", instanceData[1])
+			send_email(instanceData[0], "Welcome to Megabus Checker. Please make sure to unblock {} if you wish to receive emails from this service. \n\n Now there are tickets available:".format(mailSender), instanceData[1])
 			save_cost_data(instanceData[0], instance)
 		else:
 			if instanceData[2] == cost_template(instanceData[0]):
