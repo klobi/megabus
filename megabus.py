@@ -8,6 +8,8 @@ print 'MegaBus Ticket Checker v1.0\n'
 mailSender = "email" #Gmail account being used to send email
 mailSenderPassword = "pass" #Gmail account's password
 cityCodes = { #Cities and their respective code
+	'Hamburg':191,
+	'Koeln':135,
 	'Austin':320, 
 	'austin':320, 
 	'Dallas':317, 
