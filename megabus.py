@@ -63,18 +63,17 @@ def send_email(data, message, mailReceiver): #mailReceiver is email address of r
 	print "Email sent to {}:\n".format(mailReceiver)
 	print "{}".format(header + "\n\n\n" + message)
 
-def megabus_day_data(Month, Day, Year, destination, departure): #return trip details as list [departure, arrival, cost] for given parameters
-	global parameters 
-	parameters = (Month, Day, Year, destination, departure)
+def megabus_day_data(Day, Month, Year, destination, departure): #return trip details as list [departure, arrival, cost] for given parameters
+	global parameters
+	parameters = (Day, Month, Year, destination, departure)
 
 	print "Accessing Megabus site for data"
-	customURL = 'http://us.megabus.com/JourneyResults.aspx?originCode={}&destinationCode={}&outboundDepartureDate={}%2f{}%2f{}&inboundDepartureDate=&passengerCount=1&transportType=0&concessionCount=0&nusCount=0&outboundWheelchairSeated=0&outboundOtherDisabilityCount=0&inboundWheelchairSeated=0&inboundOtherDisabilityCount=0&outboundPcaCount=0&inboundPcaCount=0&promotionCode=&withReturn=0' .format(cityCodes[departure], cityCodes[destination], Month, Day, Year)
+	customURL = 'http://deeu.megabus.com/JourneyResults.aspx?originCode={}&destinationCode={}&outboundDepartureDate={}%2f{}%2f{}&inboundDepartureDate=&passengerCount=1&transportType=0&concessionCount=0&nusCount=0&outboundWheelchairSeated=0&outboundOtherDisabilityCount=0&inboundWheelchairSeated=0&inboundOtherDisabilityCount=0&outboundPcaCount=0&inboundPcaCount=0&promotionCode=&withReturn=0' .format(cityCodes[departure], cityCodes[destination], Day, Month, Year)
 
 	if "No journeys have been found for the date selected" in urllib.urlopen(customURL).read():
 		return False
 
-	dayData = BeautifulSoup(urllib.urlopen(customURL).read()).find_all("ul", class_="journey standard")
-
+	dayData = BeautifulSoup(urllib.urlopen(customURL).read(), 'lxml').find_all("ul", class_="journey standard none")
 	#extract all relavent information into list
 	data = []
 	for tag in dayData:
@@ -106,7 +105,7 @@ def config_to_day_data(instance): #returns ([depart, arrive, cost], email, cost)
 	userDetails = config_data(instance)
 	if userDetails == None:
 		return None
-	if not userDetails[8] == "yes":
+	if not userDetails[8] == True:
 		return "Inactive"
 	return megabus_day_data(userDetails[5], userDetails[6], userDetails[7], userDetails[3], userDetails[4]), userDetails[2], userDetails[9]
 
@@ -114,6 +113,7 @@ def save_cost_data(allData, instance):
 	configdb = sqlite.connect('config.db')
 	with configdb:
 		cursor = configdb.cursor()
+		temp = cost_template(allData)
 		cursor.execute('UPDATE users SET Cost=? WHERE Id=?', (cost_template(allData), instance))
 
 def cost_template(allData):
@@ -121,16 +121,14 @@ def cost_template(allData):
 	for trip in allData:
 		temp = temp + trip[2] + ","
 	temp = temp + ")"
-	return temp
+	return unicode(temp, "utf-8")
 
 
 #--------------------Start Main Program--------------------#
-
 while True:
 	instance = 0
 
 	while True:
-		instance = instance + 1
 		instanceData = config_to_day_data(instance)
 		if instanceData == None: #checks if user exists
 			print "User {} does not exist.".format(instance)
@@ -151,5 +149,8 @@ while True:
 			else:
 				print "User {} cost information changed.".format(instance)
 				send_email(instanceData[0], "Ticket prices for your trip date have changed.  Here are the updated prices.", instanceData[1])
+				save_cost_data(instanceData[0], instance)
+		instance = instance + 1
 	print time.strftime('%c') + ": Standby mode.  Safe to edit SQL Database for next 3 hours."			
 	time.sleep(10800)
+
